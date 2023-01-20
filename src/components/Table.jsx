@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import dataContext from '../context/dataContext';
 
 const myStyle = {
@@ -7,11 +7,23 @@ const myStyle = {
 };
 
 function Table() {
+  const [searchName, setSearchName] = useState('');
   const { data } = useContext(dataContext);
-  console.log(data);
+
+  const filtredName = data.filter((dat) => dat.name.includes(searchName));
   return (
     <>
-      <div>Tabela</div>
+      <label htmlFor="searchingname">
+        Busca por nome
+        <input
+          data-testid="name-filter"
+          name="searchingname"
+          type="text"
+          placeholder="Digite o nome de um planeta"
+          onChange={ (e) => setSearchName(e.target.value) }
+          value={ searchName }
+        />
+      </label>
       <table border="1">
         <thead style={ myStyle }>
           <tr>
@@ -31,7 +43,7 @@ function Table() {
           </tr>
         </thead>
         <tbody>
-          { data.map((infos) => (
+          { filtredName.map((infos) => (
             <tr key={ infos.name }>
               <td>
                 { infos.name }
