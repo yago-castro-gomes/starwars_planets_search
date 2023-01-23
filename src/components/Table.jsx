@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import dataContext from '../context/dataContext';
 
 const myStyle = {
@@ -8,11 +8,78 @@ const myStyle = {
 
 function Table() {
   const [searchName, setSearchName] = useState('');
+  const [category, setCategory] = useState('population');
+  const [comparison, setComparison] = useState('maior que');
+  const [valueFilter, setValueFilter] = useState(0);
+  const [filtred, setFiltred] = useState([]);
+
   const { data } = useContext(dataContext);
+  useEffect(() => setFiltred(data), [data]);
 
   const filtredName = data.filter((dat) => dat.name.includes(searchName));
+
+  useEffect(() => setFiltred(filtredName), [searchName]);
+
+  const filterCategory = () => {
+    if (comparison === 'maior que') {
+      const highThan = data.filter((cat) => (+cat[category]) > valueFilter);
+      setFiltred(highThan);
+    }
+    if (comparison === 'menor que') {
+      const highThan = data.filter((cat) => (+cat[category]) < valueFilter);
+      setFiltred(highThan);
+    }
+    if (comparison === 'igual a') {
+      const highThan = data.filter((cat) => (cat[category]) === valueFilter);
+      setFiltred(highThan);
+    }
+    if (valueFilter === '') {
+      setFiltred(data);
+    }
+  };
+
   return (
     <>
+      <label htmlFor="category">
+        <select
+          data-testid="column-filter"
+          name="category"
+          onChange={ (e) => setCategory(e.target.value) }
+        >
+          <option value="population">population</option>
+          <option value="orbital_period">orbital_period</option>
+          <option value="diameter">diameter</option>
+          <option value="rotation_period">rotation_period</option>
+          <option value="surface_water">surface_water</option>
+        </select>
+      </label>
+      <label htmlFor="comparison">
+        <select
+          data-testid="comparison-filter"
+          name="comparison"
+          onChange={ (e) => setComparison(e.target.value) }
+        >
+          <option value="maior que">maior que</option>
+          <option value="menor que">menor que</option>
+          <option value="igual a">igual a</option>
+        </select>
+      </label>
+      <label htmlFor="valuefilter">
+        <input
+          type="text"
+          data-testid="value-filter"
+          name="valuefilter"
+          value={ valueFilter }
+          onChange={ (e) => setValueFilter(e.target.value) }
+        />
+      </label>
+      <button
+        data-testid="button-filter"
+        onClick={ filterCategory }
+      >
+        Pesquisar
+
+      </button>
       <label htmlFor="searchingname">
         Busca por nome
         <input
@@ -43,7 +110,7 @@ function Table() {
           </tr>
         </thead>
         <tbody>
-          { filtredName.map((infos) => (
+          { filtred.map((infos) => (
             <tr key={ infos.name }>
               <td>
                 { infos.name }
