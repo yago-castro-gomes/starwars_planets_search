@@ -12,6 +12,7 @@ function Table() {
   const [comparison, setComparison] = useState('maior que');
   const [valueFilter, setValueFilter] = useState(0);
   const [filtred, setFiltred] = useState([]);
+  const [filterShowing, setFilterShowing] = useState([]);
 
   const { data } = useContext(dataContext);
   useEffect(() => setFiltred(data), [data]);
@@ -21,17 +22,33 @@ function Table() {
   useEffect(() => setFiltred(filtredName), [searchName]);
 
   const filterCategory = () => {
+    const showFilter = `${category} ${comparison} ${valueFilter}`;
     if (comparison === 'maior que') {
       const highThan = data.filter((cat) => (+cat[category]) > valueFilter);
+      setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
+      if (highThan.length > 1) {
+        const highTwo = filtred.filter((cat) => (+cat[category]) > valueFilter);
+        setFiltred(highTwo);
+      }
     }
     if (comparison === 'menor que') {
       const highThan = data.filter((cat) => (+cat[category]) < valueFilter);
+      setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
+      if (highThan.length > 1) {
+        const highTwo = filtred.filter((cat) => (+cat[category]) < valueFilter);
+        setFiltred(highTwo);
+      }
     }
     if (comparison === 'igual a') {
       const highThan = data.filter((cat) => (cat[category]) === valueFilter);
+      setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
+      if (highThan.length > 1) {
+        const highTwo = filtred.filter((cat) => (cat[category]) === valueFilter);
+        setFiltred(highTwo);
+      }
     }
     if (valueFilter === '') {
       setFiltred(data);
@@ -91,6 +108,14 @@ function Table() {
           value={ searchName }
         />
       </label>
+      <div>
+        { filterShowing.map((show, i) => (
+          <div key={ i }>
+            { show }
+            <button>delete</button>
+          </div>
+        )) }
+      </div>
       <table border="1">
         <thead style={ myStyle }>
           <tr>
