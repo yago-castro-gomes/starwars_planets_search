@@ -5,6 +5,7 @@ import dataContext from './context/dataContext';
 
 function App() {
   const [data, setData] = useState([]);
+  const [optionsKeys, setOptionsKeys] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,12 +15,14 @@ function App() {
       const removeResidents = dataResponse
         .filter((remove) => delete remove.residents);
       setData(removeResidents);
+      setOptionsKeys(Object.keys(removeResidents[0]));
     };
     fetchData();
   }, []);
 
   const context = {
     data,
+    optionsKeys,
   };
 
   return (

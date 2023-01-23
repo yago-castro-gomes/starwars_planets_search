@@ -13,20 +13,38 @@ function Table() {
   const [valueFilter, setValueFilter] = useState(0);
   const [filtred, setFiltred] = useState([]);
   const [filterShowing, setFilterShowing] = useState([]);
+  const [optionsKeys, setOptionsKeys] = useState([]);
 
   const { data } = useContext(dataContext);
   useEffect(() => setFiltred(data), [data]);
 
   const filtredName = data.filter((dat) => dat.name.includes(searchName));
 
+  const arrayOptions = ['population', 'orbital_period',
+    'diameter', 'rotation_period', 'surface_water'];
+
+  useEffect(() => {
+    const setOptions = () => {
+      setOptionsKeys(arrayOptions);
+    };
+    setOptions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setFiltred(filtredName), [searchName]);
 
+  const showFilter = {
+    column: category,
+    comparison,
+    value: valueFilter,
+  };
   const filterCategory = () => {
-    const showFilter = `${category} ${comparison} ${valueFilter}`;
     if (comparison === 'maior que') {
       const highThan = data.filter((cat) => (+cat[category]) > valueFilter);
       setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
+
       if (highThan.length > 1) {
         const highTwo = filtred.filter((cat) => (+cat[category]) > valueFilter);
         setFiltred(highTwo);
@@ -36,6 +54,8 @@ function Table() {
       const highThan = data.filter((cat) => (+cat[category]) < valueFilter);
       setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
+      const removeCategory = highThan.filter((cat) => Object.keys(cat) !== category);
+      console.log(removeCategory);
       if (highThan.length > 1) {
         const highTwo = filtred.filter((cat) => (+cat[category]) < valueFilter);
         setFiltred(highTwo);
@@ -53,6 +73,8 @@ function Table() {
     if (valueFilter === '') {
       setFiltred(data);
     }
+    const removeArray = optionsKeys.filter((cat) => cat !== category);
+    setOptionsKeys(removeArray);
   };
 
   return (
@@ -63,11 +85,15 @@ function Table() {
           name="category"
           onChange={ (e) => setCategory(e.target.value) }
         >
-          <option value="population">population</option>
+          { optionsKeys.map((opt) => ((
+            <option key={ opt } value={ opt }>
+              { opt }
+            </option>)))}
+          {/* <option value="population">population</option>
           <option value="orbital_period">orbital_period</option>
           <option value="diameter">diameter</option>
           <option value="rotation_period">rotation_period</option>
-          <option value="surface_water">surface_water</option>
+          <option value="surface_water">surface_water</option> */}
         </select>
       </label>
       <label htmlFor="comparison">
@@ -92,7 +118,7 @@ function Table() {
       </label>
       <button
         data-testid="button-filter"
-        onClick={ filterCategory }
+        onClick={ () => filterCategory() }
       >
         Pesquisar
 
@@ -111,7 +137,9 @@ function Table() {
       <div>
         { filterShowing.map((show, i) => (
           <div key={ i }>
-            { show }
+            { show.column }
+            { show.comparison }
+            { show.value }
             <button>delete</button>
           </div>
         )) }
