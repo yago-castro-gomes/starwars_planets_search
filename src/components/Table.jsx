@@ -5,6 +5,8 @@ const myStyle = {
   color: 'white',
   backgroundColor: 'black',
 };
+const arrayOptions = ['population', 'orbital_period',
+  'diameter', 'rotation_period', 'surface_water'];
 
 function Table() {
   const [searchName, setSearchName] = useState('');
@@ -20,16 +22,7 @@ function Table() {
 
   const filtredName = data.filter((dat) => dat.name.includes(searchName));
 
-  const arrayOptions = ['population', 'orbital_period',
-    'diameter', 'rotation_period', 'surface_water'];
-
-  useEffect(() => {
-    const setOptions = () => {
-      setOptionsKeys(arrayOptions);
-    };
-    setOptions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => setOptionsKeys(arrayOptions), []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setFiltred(filtredName), [searchName]);
@@ -75,6 +68,8 @@ function Table() {
     }
     const removeArray = optionsKeys.filter((cat) => cat !== category);
     setOptionsKeys(removeArray);
+    setCategory(removeArray[0]);
+    console.log(removeArray);
   };
 
   return (
@@ -88,7 +83,8 @@ function Table() {
           { optionsKeys.map((opt) => ((
             <option key={ opt } value={ opt }>
               { opt }
-            </option>)))}
+            </option>
+          )))}
           {/* <option value="population">population</option>
           <option value="orbital_period">orbital_period</option>
           <option value="diameter">diameter</option>
