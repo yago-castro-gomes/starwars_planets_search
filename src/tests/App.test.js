@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import { render, screen } from '@testing-library/react';
 import App from '../App';
 import userEvent from '@testing-library/user-event';
-import apiFetch from '../hooks/apiFetch';
 import { mockPlanets } from './mocks';
 import { act } from 'react-dom/test-utils';
+import Table from '../components/Table';
 
 describe('Testa aplicalçao' , () => {
   beforeEach(() => {
@@ -50,17 +50,33 @@ describe('Testa aplicalçao' , () => {
 });
 
 test('testando a API', async () => {
- await act(() => render(<App/>)) 
+ await act(() => render(<App />));
  const table = await screen.getByRole('table');
  expect(table).toBeInTheDocument();
  
  const allPlanets = await screen.findAllByTestId("planet-name");
  expect(allPlanets).toHaveLength(10);
-
- const nameInput = await screen.getByTestId('name-filter');
- userEvent.type(nameInput, 'oo')
  const onlyPlanet = await screen.findByText('Naboo')
  expect(onlyPlanet).toBeInTheDocument();
+ const searchInput = screen.getByTestId('button-filter')
+ expect(searchInput).toBeInTheDocument();
+ userEvent.click(searchInput);
+ await expect(await screen.findAllByTestId("planet-name")).toHaveLength(8);
+ const categoryInput = screen.getByTestId('column-filter')
+ userEvent.selectOptions(categoryInput, 'surface_water')
+ userEvent.click(searchInput);
+ await expect(await screen.findAllByTestId("planet-name")).toHaveLength(6);
+ const removeAllFilters = screen.getByRole('button', {
+  name: /remover todos os filtros/i
+})
+userEvent.click(removeAllFilters)
+await expect(await screen.findAllByTestId("planet-name")).toHaveLength(10);
+const comparissonInput = screen.getByTestId('comparison-filter')
+userEvent.selectOptions(comparissonInput, 'menor que');
+const valueInput = screen.getByTestId('value-filter')
+userEvent.type(valueInput, '10000');
+userEvent.click(searchInput);
+await expect(await screen.findAllByTestId("planet-name")).toHaveLength(1);
 })
 })
 
