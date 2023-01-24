@@ -1,12 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import dataContext from '../context/dataContext';
-
-const myStyle = {
-  color: 'white',
-  backgroundColor: 'black',
-};
-const arrayOptions = ['population', 'orbital_period',
-  'diameter', 'rotation_period', 'surface_water'];
+import { myStyle, arrayOptions, arraySort } from '../helpers';
 
 function Table() {
   const [searchName, setSearchName] = useState('');
@@ -17,15 +11,13 @@ function Table() {
   const [filterShowing, setFilterShowing] = useState([]);
   const [optionsKeys, setOptionsKeys] = useState([]);
   const [lastState, setLastState] = useState([]);
+  const [sortCategory, setSortCategory] = useState('population');
+  const [sortInput, setSortInput] = useState('');
 
   const { data } = useContext(dataContext);
-  useEffect(() => setFiltred(data), [data]);
-
   const filtredName = data.filter((dat) => dat.name.includes(searchName));
-
+  useEffect(() => setFiltred(data), [data]);
   useEffect(() => setOptionsKeys(arrayOptions), []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setFiltred(filtredName), [searchName]);
 
   const showFilter = {
@@ -41,7 +33,6 @@ function Table() {
       setFiltred(highThan);
       if (highThan.length > 1) {
         const highTwo = filtred.filter((cat) => (+cat[category]) > valueFilter);
-        // setLastState(highThan);
         setFiltred(highTwo);
       }
     }
@@ -49,8 +40,6 @@ function Table() {
       const highThan = data.filter((cat) => (+cat[category]) < valueFilter);
       setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
-      // const removeCategory = highThan.filter((cat) => Object.keys(cat) !== category);
-      // console.log(removeCategory);
       if (highThan.length > 1) {
         const highTwo = filtred.filter((cat) => (+cat[category]) < valueFilter);
         setFiltred(highTwo);
@@ -72,7 +61,6 @@ function Table() {
     setOptionsKeys(removeArray);
     setCategory(removeArray[0]);
   };
-
   const removeAllFilters = () => {
     setFiltred(data);
     setOptionsKeys(arrayOptions);
@@ -80,18 +68,36 @@ function Table() {
     setFilterShowing([]);
     setValueFilter(0);
   };
-
   const removeSelectedFilter = () => {
     const anyLess = lastState.pop();
     setFiltred(anyLess);
     const filterPop = filterShowing.pop();
-
     console.log(filterPop);
-    // if ( filterShowing.length > 0) {
-    //   setFilterShowing(filterPop);
-    // }
   };
 
+  const sortButton = () => {
+    const MAGICNUMBER = -1;
+    if (sortInput === 'ASC') {
+      const ascFiltred = filtred.filter((asc) => (asc[sortCategory]))
+        .sort((a, b) => {
+          if (a[sortCategory] === 'unknown') return 1;
+          if (b[sortCategory] === 'unknown') return MAGICNUMBER;
+          return +a[sortCategory] - +b[sortCategory];
+        });
+      setFiltred(ascFiltred);
+    }
+    if (sortInput === 'DESC') {
+      const descFiltred = filtred.filter((asc) => (asc[sortCategory]))
+        .sort((a, b) => {
+          if (a === 'unknown') return 1;
+          if (b === 'unknown') return MAGICNUMBER;
+          return +b[sortCategory] - +a[sortCategory];
+        });
+      setFiltred(descFiltred);
+    }
+  };
+
+  console.log(sortInput);
   return (
     <>
       <label htmlFor="category">
@@ -105,11 +111,6 @@ function Table() {
               { opt }
             </option>
           )))}
-          {/* <option value="population">population</option>
-          <option value="orbital_period">orbital_period</option>
-          <option value="diameter">diameter</option>
-          <option value="rotation_period">rotation_period</option>
-          <option value="surface_water">surface_water</option> */}
         </select>
       </label>
       <label htmlFor="comparison">
@@ -137,7 +138,6 @@ function Table() {
         onClick={ () => filterCategory() }
       >
         Pesquisar
-
       </button>
       <label htmlFor="searchingname">
         Busca por nome
@@ -150,6 +150,42 @@ function Table() {
           value={ searchName }
         />
       </label>
+      <label htmlFor="ascdesc">
+        <select
+          data-testid="column-sort"
+          name="ascdesc"
+          onChange={ (e) => setSortCategory(e.target.value) }
+        >
+          { arraySort.map((opt) => ((
+            <option key={ opt } value={ opt }>
+              { opt }
+            </option>
+          )))}
+        </select>
+      </label>
+      <label htmlFor="inputSort">
+        Ascendente
+        <input
+          id="inputSortAsc"
+          type="radio"
+          data-testid="column-sort-input-asc"
+          value="ASC"
+          name="radiosort"
+          onChange={ (e) => setSortInput(e.target.value) }
+        />
+      </label>
+      <label htmlFor="inputSortDesc">
+        Descendente
+        <input
+          name="radiosort"
+          id="inputSortDesc"
+          type="radio"
+          data-testid="column-sort-input-desc"
+          value="DESC"
+          onChange={ (e) => setSortInput(e.target.value) }
+        />
+      </label>
+      <button data-testid="column-sort-button" onClick={ sortButton }> Ordenar </button>
       <div>
         { filterShowing.map((show, i) => (
           <div key={ i } data-testid="filter">
@@ -163,10 +199,8 @@ function Table() {
       <button
         data-testid="button-remove-filters"
         onClick={ removeAllFilters }
-
       >
         Remover todos os filtros
-
       </button>
       <table border="1">
         <thead style={ myStyle }>
@@ -189,46 +223,19 @@ function Table() {
         <tbody>
           { filtred.map((infos) => (
             <tr key={ infos.name }>
-              <td>
-                { infos.name }
-              </td>
-              <td>
-                { infos.rotation_period }
-              </td>
-              <td>
-                { infos.orbital_period }
-              </td>
-              <td>
-                { infos.diameter }
-              </td>
-              <td>
-                { infos.climate }
-              </td>
-              <td>
-                { infos.gravity }
-              </td>
-              <td>
-                { infos.terrain }
-              </td>
-              <td>
-                { infos.surface_water }
-              </td>
-              <td>
-                { infos.population }
-              </td>
-              <td>
-                { infos.films }
-              </td>
-              <td>
-                { infos.created }
-              </td>
-              <td>
-                { infos.edited }
-              </td>
-              <td>
-                { infos.url }
-              </td>
-
+              <td data-testid="planet-name">{ infos.name }</td>
+              <td>{ infos.rotation_period }</td>
+              <td>{ infos.orbital_period }</td>
+              <td>{ infos.diameter }</td>
+              <td>{ infos.climate }</td>
+              <td>{ infos.gravity }</td>
+              <td>{ infos.terrain }</td>
+              <td>{ infos.surface_water }</td>
+              <td>{ infos.population }</td>
+              <td>{ infos.films }</td>
+              <td>{ infos.created }</td>
+              <td>{ infos.edited }</td>
+              <td>{ infos.url }</td>
             </tr>
           ))}
         </tbody>
@@ -236,5 +243,4 @@ function Table() {
     </>
   );
 }
-
 export default Table;
