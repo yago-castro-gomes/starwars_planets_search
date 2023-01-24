@@ -16,8 +16,6 @@ describe('Testa aplicalçao' , () => {
   afterEach(() => {
     jest.clearAllMocks();
   })
-
-
   test('Testando inputs', async () => {
   await act(() => render(<App />));
   const categoryInput = screen.getByTestId('column-filter', {name:/population/i});
@@ -77,6 +75,41 @@ const valueInput = screen.getByTestId('value-filter')
 userEvent.type(valueInput, '10000');
 userEvent.click(searchInput);
 await expect(await screen.findAllByTestId("planet-name")).toHaveLength(1);
+})
+test('continua testando a Api', async () => {
+await act(() => render(<App />))
+const valueInput = screen.getByTestId('value-filter')
+const comparissonInput = screen.getByTestId('comparison-filter')
+const searchInput = screen.getByTestId('button-filter')
+const categoryInput = screen.getByTestId('column-filter')
+ userEvent.selectOptions(comparissonInput, 'igual a')
+ userEvent.selectOptions(categoryInput, 'population')
+ userEvent.type(valueInput, '1000');
+ userEvent.click(searchInput);
+const deleteOneFilter = screen.getByRole('button', {
+  name: /delete/i
+})
+ userEvent.click(deleteOneFilter);
+ await expect(await screen.findAllByTestId("planet-name")).toHaveLength(10);
+})
+test('testa o função de sort', async () => {
+  await act(() => render(<App />))
+  const ascRadio = screen.getByTestId('column-sort-input-asc')
+  const descRadio = screen.getByTestId('column-sort-input-desc')
+  const sortInput = screen.getByRole('button', {name: /ordenar/i})
+  const columnSort = screen.getByTestId('column-sort')
+  userEvent.selectOptions(columnSort, 'rotation_period')
+  userEvent.click(ascRadio);
+  userEvent.click(sortInput);
+  await expect(await screen.findAllByTestId("planet-name")).toHaveLength(10);
+  const planetsAll = await screen.findAllByTestId("planet-name")
+  await expect(await planetsAll[0]).toHaveTextContent('Bespin');
+
+  userEvent.click(descRadio);
+  userEvent.selectOptions(columnSort, 'surface_water')
+  userEvent.click(sortInput);
+  await expect(await screen.findAllByTestId("planet-name")).toHaveLength(10);
+  await expect(await planetsAll[0]).toHaveTextContent('Bespin');
 })
 })
 
