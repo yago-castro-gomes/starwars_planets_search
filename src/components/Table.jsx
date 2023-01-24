@@ -16,6 +16,7 @@ function Table() {
   const [filtred, setFiltred] = useState([]);
   const [filterShowing, setFilterShowing] = useState([]);
   const [optionsKeys, setOptionsKeys] = useState([]);
+  const [lastState, setLastState] = useState([]);
 
   const { data } = useContext(dataContext);
   useEffect(() => setFiltred(data), [data]);
@@ -33,13 +34,14 @@ function Table() {
     value: valueFilter,
   };
   const filterCategory = () => {
+    setLastState((prevstate) => [...prevstate, filtred]);
     if (comparison === 'maior que') {
       const highThan = data.filter((cat) => (+cat[category]) > valueFilter);
       setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
-
       if (highThan.length > 1) {
         const highTwo = filtred.filter((cat) => (+cat[category]) > valueFilter);
+        // setLastState(highThan);
         setFiltred(highTwo);
       }
     }
@@ -47,8 +49,8 @@ function Table() {
       const highThan = data.filter((cat) => (+cat[category]) < valueFilter);
       setFilterShowing((prevstate) => [...prevstate, showFilter]);
       setFiltred(highThan);
-      const removeCategory = highThan.filter((cat) => Object.keys(cat) !== category);
-      console.log(removeCategory);
+      // const removeCategory = highThan.filter((cat) => Object.keys(cat) !== category);
+      // console.log(removeCategory);
       if (highThan.length > 1) {
         const highTwo = filtred.filter((cat) => (+cat[category]) < valueFilter);
         setFiltred(highTwo);
@@ -69,7 +71,25 @@ function Table() {
     const removeArray = optionsKeys.filter((cat) => cat !== category);
     setOptionsKeys(removeArray);
     setCategory(removeArray[0]);
-    console.log(removeArray);
+  };
+
+  const removeAllFilters = () => {
+    setFiltred(data);
+    setOptionsKeys(arrayOptions);
+    setCategory('population');
+    setFilterShowing([]);
+    setValueFilter(0);
+  };
+
+  const removeSelectedFilter = () => {
+    const anyLess = lastState.pop();
+    setFiltred(anyLess);
+    const filterPop = filterShowing.pop();
+
+    console.log(filterPop);
+    // if ( filterShowing.length > 0) {
+    //   setFilterShowing(filterPop);
+    // }
   };
 
   return (
@@ -132,14 +152,22 @@ function Table() {
       </label>
       <div>
         { filterShowing.map((show, i) => (
-          <div key={ i }>
+          <div key={ i } data-testid="filter">
             { show.column }
             { show.comparison }
             { show.value }
-            <button>delete</button>
+            <button onClick={ removeSelectedFilter }>delete</button>
           </div>
         )) }
       </div>
+      <button
+        data-testid="button-remove-filters"
+        onClick={ removeAllFilters }
+
+      >
+        Remover todos os filtros
+
+      </button>
       <table border="1">
         <thead style={ myStyle }>
           <tr>
