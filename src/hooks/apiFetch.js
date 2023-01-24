@@ -1,4 +1,4 @@
-function apiFetch() {
+export function apiFetch() {
   const fetchData = async () => {
     const fetchUrl = await fetch('https://swapi.dev/api/planets');
     const response = await fetchUrl.json();
