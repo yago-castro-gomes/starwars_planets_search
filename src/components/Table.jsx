@@ -73,6 +73,7 @@ function Table() {
     setFiltred(anyLess);
     const filterPop = filterShowing.pop();
     console.log(filterPop);
+    setOptionsKeys(filterPop);
   };
 
   const sortButton = () => {
